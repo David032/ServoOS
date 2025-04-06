@@ -10,6 +10,9 @@ from lsm6ds3 import LSM6DS3
 from smbus2 import SMBus
 from bme280 import BME280
 from picamera2 import Picamera2
+from pygame import mixer
+
+mixer.init()
 
 GreenLed = LED(6)
 AltGreenLed = LED(25) #Yup, not working
@@ -22,10 +25,11 @@ ColourLed = RGBLED(red = 17, green = 18, blue = 27) #Also not working
 
 buzzer = TonalBuzzer(12) #Works, but need to spend some time finding good tones
 
-rtc = rv3028.RV3028()
-rtc.set_battery_switchover('level_switching_mode')
-current_system_time = datetime.datetime.now()
-rtc.set_time_and_date(current_system_time)
+#Might only have to run the rtc set-up once per system?
+# rtc = rv3028.RV3028()
+# rtc.set_battery_switchover('level_switching_mode')
+# current_system_time = datetime.datetime.now()
+# rtc.set_time_and_date(current_system_time)
 
 lsm = LSM6DS3()
 bus = SMBus(1)
@@ -33,6 +37,10 @@ bme280 = BME280(i2c_dev=bus)
 
 #Camera
 cam = Picamera2()
+capture_config = cam.create_still_configuration()
+cam.configure(capture_config)
+
+testAudio = mixer.Sound("Resources/TestAudio.wav")
 
 
 def printMsg():
@@ -44,8 +52,8 @@ LittleButton.when_activated = printMsg
 LittleButton.when_activated = printMsg
 
 while True:
-    rtc_time = rtc.get_time_and_date()
-    print("The time is: {:02d}:{:02d}:{:02d} on :{:02d}/{:02d}/{:02d}".format(rtc_time.hour, rtc_time.minute, rtc_time.second, rtc_time.day, rtc_time.month, rtc_time.year))     
+    currentTime = time.gmtime()
+    print("The time is: {:02d}:{:02d}:{:02d} on :{:02d}/{:02d}/{:02d}".format(currentTime.tm_hour, currentTime.tm_min, currentTime.tm_sec, currentTime.tm_mday, currentTime.tm_mon, currentTime.tm_year))     
     #buzzer.play(60)
     GreenLed.on()
     sleep(2)
@@ -63,4 +71,7 @@ while True:
     pressure = bme280.get_pressure()
     humidity = bme280.get_humidity()
     print(f"{temperature:05.2f}°C {pressure:05.2f}hPa {humidity:05.2f}%")
-    cam.start_and_capture_file("Walkaround_test.jpg")
+    cam.start()
+    cam.capture_file("Walkaround_test.jpg")
+    testAudio.play()
+    print("----- End of test -----")
