@@ -1,0 +1,7 @@
+#Do sudo nano /boot/firmware/config.txt and add this to the bottom
+
+[all]
+dtoverlay=i2c-rtc,rv3028,backup-switchover-mode=1
+
+audio_pwm_mode=2
+dtoverlay=audremap,pins_12_13

@@ -1,0 +1,4 @@
+{
+    "bme280":true,
+    "lsm6ds3":true
+}

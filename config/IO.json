@@ -1,0 +1,8 @@
+{
+    "ActionButton": 4,
+    "ChangeModeButton": 23,
+    "GreenLed":6,
+    "YellowLed":5,
+    "RedLed":24,
+    "Buzzer":12
+}
