@@ -12,6 +12,8 @@ from pygame import mixer
 import libcamera
 from pathlib import Path
 from signal import pause
+from picamera2.encoders import H264Encoder
+from picamera2.outputs import FfmpegOutput
 
 #region Setup folders
 currentTime = time.gmtime()
@@ -61,6 +63,7 @@ except:
 #endregion
 
 #region Init Camera
+pictureMode: bool = True
 with open("config/CameraConfig.json") as cam_data:
     camSettings: dict = json.load(cam_data)
 
@@ -80,19 +83,43 @@ takeImageSound = mixer.Sound("Resources/CaptureImage.mp3")
 #endregion
 
 #region Setup Actions
-def TakePicture():
-    RedLed.on()
-    currentTime = time.gmtime()
-    captureTime: str = "{:02d}:{:02d}:{:02d}".format(currentTime.tm_hour, currentTime.tm_min, currentTime.tm_sec)
-    cam.start()
-    cam.capture_file(str(capturesPath) + '/' + captureTime + ".jpg")
-    takeImageSound.play()
-    print("Image captured")
-    #Logger.logMessage
-    cam.stop()
-    RedLed.off()
+def Capture():
+    if pictureMode:
+        RedLed.on()
+        currentTime = time.gmtime()
+        captureTime: str = "{:02d}:{:02d}:{:02d}".format(currentTime.tm_hour, currentTime.tm_min, currentTime.tm_sec)
+        cam.start()
+        cam.capture_file(str(capturesPath) + '/' + captureTime + ".jpg")
+        takeImageSound.play()
+        print("Image captured")
+        #Logger.logMessage
+        cam.stop()
+        RedLed.off()
+    else: 
+        RedLed.on()
+        currentTime = time.gmtime()
+        captureTime: str = "{:02d}:{:02d}:{:02d}".format(currentTime.tm_hour, currentTime.tm_min, currentTime.tm_sec)
+        encoder = H264Encoder(10000000)
+        output = FfmpegOutput(str(capturesPath) + '/' + captureTime  + '.mp4')
+        cam.start_recording(encoder, output)
+        time.sleep(30)
+        cam.stop_recording()
+        print("Video recorded")
+        RedLed.off()
 
-ActionButton.when_activated = TakePicture
+def SwapMode():
+    print("Mode Changed!")
+    global pictureMode 
+    pictureMode = ~pictureMode
+    if pictureMode:
+        YellowLed.off()
+    else:
+        YellowLed.on()
+
+
+
+ActionButton.when_activated = Capture
+ModeButton.when_held = SwapMode
 #endregion
 
 #region Final checks

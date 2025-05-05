@@ -14,8 +14,8 @@ from pygame import mixer
 
 mixer.init()
 
-GreenLed = LED(6)
-AltGreenLed = LED(25) #Yup, not working
+GreenLed = LED(19) #21
+#AltGreenLed = LED(25) #Yup, not working
 RedLed = LED(24)
 YellowLed = LED(5)
 
